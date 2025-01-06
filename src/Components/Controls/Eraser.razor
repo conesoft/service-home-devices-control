@@ -1,0 +1,18 @@
+﻿@inject ActionsList actions
+
+<section>
+    <header>toolbar</header>
+    <ul>
+        <li>
+            <p style="grid-column: 2">✕</p>
+            <a title="restart service" @onclick="@ClearList" @onclick:preventDefault=true @onclick:stopPropagation=true>clear list</a>
+        </li>
+    </ul>
+</section>
+
+@code {
+    void ClearList()
+    {
+        actions.Clear();
+    }
+}

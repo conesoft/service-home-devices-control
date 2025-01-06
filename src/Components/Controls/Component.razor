@@ -1,0 +1,38 @@
+﻿@inject ActionsList actions
+
+@implements IDisposable
+
+<section>
+    <header>actions</header>
+    <ul>
+        @if (actions.Actions.Count == 0)
+        {
+            <li style="text-align: center; color: grey; font-weight: 100">
+                no actions yet
+            </li>
+        }
+        @foreach (var action in actions.Actions)
+        {
+            <li>
+                <p>@action</p>
+            </li>
+        }
+    </ul>
+</section>
+
+@code {
+    protected override void OnInitialized()
+    {
+        actions.StateChanged += OnStateChanged;
+    }
+
+    public void Dispose()
+    {
+        actions.StateChanged -= OnStateChanged;
+    }
+
+    public void OnStateChanged()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+}
