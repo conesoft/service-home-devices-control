@@ -84,7 +84,7 @@ public static class MapDeviceApiExtensions
                     BitArray bits = new(200 * 200);
                     Log.Information("preparing image for {device}", deviceid);
 
-                    var font = SystemFonts.Get("Segoe UI Emoji").CreateFont(22, FontStyle.Bold);
+                    var font = SystemFonts.Get("Segoe UI Emoji").CreateFont(20, FontStyle.Bold);
                     HttpClient client = new();
                     var rssresponse = await client.GetStringAsync(@"https://bsky.app/profile/did:plc:jsfqqy7p34wxeqycehtdellg/rss");
                     var posturl = rssresponse.Split("<item>").Skip(1).First().Split("<link>").Skip(1).First().Split("</link>").FirstOrDefault();
@@ -100,7 +100,7 @@ public static class MapDeviceApiExtensions
                                 postcontent,
                                 font,
                                 Color.Black,
-                                new(5, 20)
+                                new(5, 25)
                             )
                             .Grayscale(GrayscaleMode.Bt709)
                             .Dither()
@@ -113,7 +113,7 @@ public static class MapDeviceApiExtensions
                                 for (int x = 0; x < 200; x++)
                                 {
                                     ref L8 pixel = ref pixelRow[x];
-                                    bits[x + 200 * y] = pixel.PackedValue > byte.MaxValue / 2;
+                                    bits[x + 200 * y] = pixel.PackedValue > (byte.MaxValue / 2 + byte.MaxValue / 16);
                                 }
                             }
                         });
