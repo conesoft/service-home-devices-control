@@ -1,0 +1,16 @@
+﻿@inherits LayoutComponentBase
+
+<UserHeaderNav>
+    <HomeButtonContent>⌂</HomeButtonContent>
+    <NavContent>
+        <NavLink>devices</NavLink> ▸
+        <NavLink Match=NavLinkMatch.All href="/">events</NavLink>
+        <NavLink href="/actions">actions</NavLink>
+    </NavContent>
+</UserHeaderNav>
+
+<AuthorizeView Context="authorizedContext">
+    <Authorized>
+        @Body
+    </Authorized>
+</AuthorizeView>

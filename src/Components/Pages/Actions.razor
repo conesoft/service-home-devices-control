@@ -1,0 +1,36 @@
+﻿@page "/actions"
+@using Conesoft.Blazor.Components.Base
+@using Conesoft.Files
+
+@rendermode InteractiveServer
+
+<main>
+    <section>
+        <ul class="without-icon">
+            <HostingEnvironment Context="environment">
+                <LiveDirectory Directory=@(environment.Local.Storage / "configurations")>
+                    @foreach (var file in context.Files.Where(f => f.Extension == "json"))
+                    {
+                        <li>
+                            <section>
+                                <b>@file.NameWithoutExtension</b>
+                                @if(file.Now.ReadFromJson<Configuration>() is Configuration configuration)
+                                {
+                                    <i>@configuration.Target as @configuration.Type</i>
+                                }
+                                else
+                                {
+                                    <i>configuration missing</i>
+                                }
+                            </section>
+                        </li>
+                    }
+                </LiveDirectory>
+            </HostingEnvironment>
+        </ul>
+    </section>
+</main>
+
+@code {
+    record Configuration(string Target, string Type);
+}

@@ -1,4 +1,5 @@
 ﻿@page "/"
+@using Conesoft.Blazor.Components.Base
 @using Conesoft.Blazor.Components.Interfaces
 @using Conesoft.Blazor.Components
 @using System.Reflection
@@ -7,20 +8,25 @@
 
 @rendermode InteractiveServer
 
-<CascadingAuthenticationState>
-    <UserHeaderNav>
-        <HomeButtonContent>⌂</HomeButtonContent>
-        <NavContent>
-            <NavLink>devices</NavLink> ▸
-            <NavLink Match=NavLinkMatch.All href="/">actions</NavLink>
-        </NavContent>
-    </UserHeaderNav>
-    <AuthorizeView>
-        <Authorized>
-            <main>
-                <Eraser/>
-                <Component/>
-            </main>
-        </Authorized>
-    </AuthorizeView>
-</CascadingAuthenticationState>
+<main>
+    <HostingEnvironment Context="environment">
+        <LiveDirectory Directory="@(environment.Global.Storage / "home")" AllDirectories=true>
+            @foreach (var group in context.AllFiles.GroupBy(f => f.Parent))
+            {
+                <section title="@group.Key.Name">
+                    <ul class="without-icon">
+                        @foreach(var file in group)
+                        {
+                            <li>
+                                <section>
+                                    <i>@file.NameWithoutExtension</i>
+                                    <b>@file.Now.ReadText()</b>
+                                </section>
+                            </li>
+                        }
+                    </ul>
+                </section>
+            }
+        </LiveDirectory>
+    </HostingEnvironment>
+</main>

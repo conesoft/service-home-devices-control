@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using Conesoft.Services.HomeDevicesControl.Features.Events.Interfaces;
+using Conesoft.Services.HomeDevicesControl.Features.WebDevices.Events;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Serilog;
 using SixLabors.Fonts;
@@ -8,7 +10,6 @@ using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 using System;
 using System.Collections;
-using System.IO;
 using System.Linq;
 using System.Net.Http;
 
@@ -18,7 +19,7 @@ public static class MapDeviceApiExtensions
 {
     public static WebApplication MapDevicesHttpApi(this WebApplication app)
     {
-        app.MapGet("/device/action", (HttpContext context, ActionsList actions) =>
+        app.MapGet("/device/action", (HttpContext context, IAddEvent addEvent) =>
         {
             var userAgent = context.Request.GetTypedHeaders().Headers.UserAgent;
             if (userAgent == "Conesoft-Web-Button")
@@ -26,51 +27,10 @@ public static class MapDeviceApiExtensions
                 if (context.Request.Headers.TryGetValue("Conesoft-Web-Button-Id", out var buttonid))
                 {
                     var id = buttonid.ToString();
-                    actions.Add(id);
+                    addEvent.Add(new WebButtonIdEvent(id));
                     return Results.Ok();
                 }
             }
-            return Results.BadRequest();
-        });
-
-        int imageIndex = 0;
-
-        app.MapGet("/device/image-old", (HttpContext context) =>
-        {
-            var userAgent = context.Request.GetTypedHeaders().Headers.UserAgent;
-            if (userAgent == "Conesoft-Web-Image")
-            {
-                if (context.Request.Headers.TryGetValue("Conesoft-Web-Image-Id", out var deviceid))
-                {
-                    BitArray bits = new(200 * 200);
-                    Log.Information("preparing image for {device}", deviceid);
-                    using (var image = SixLabors.ImageSharp.Image.Load<L8>(@$"wwwroot/images/{imageIndex}.png"))
-                    {
-                        image.Mutate(x => x.Resize(200, 200));
-                        image.ProcessPixelRows(accessor =>
-                        {
-                            for (int y = 0; y < 200; y++)
-                            {
-                                Span<L8> pixelRow = accessor.GetRowSpan(y);
-                                for (int x = 0; x < 200; x++)
-                                {
-                                    ref L8 pixel = ref pixelRow[x];
-                                    bits[x + 200 * y] = pixel.PackedValue > byte.MaxValue / 2;
-                                }
-                            }
-                        });
-                    }
-                    imageIndex = (imageIndex + 1) % Directory.GetFiles("wwwroot/images", "*.png").Length;
-                    Log.Information("sending image to {device}", deviceid);
-                    var bytes = bits.ToBytes();
-                    for (var i = 0; i < bytes.Length; i++)
-                    {
-                        bytes[i] = bytes[i].Reverse();
-                    }
-                    return Results.Bytes(bytes);
-                }
-            }
-            Log.Information("request from {device} with {*headers}", userAgent, context.Request.Headers);
             return Results.BadRequest();
         });
 
